@@ -1,0 +1,11 @@
+SELECT ?x 
+
+WHERE
+{ 
+	VALUES ?kb {wd:Q27117026 wd:Q223092 wd:Q27108680}
+    VALUES ?cort {wd:Q190875}
+  
+    ?cort ?x ?kb ; # what is their relationship 
+
+	SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
+}
