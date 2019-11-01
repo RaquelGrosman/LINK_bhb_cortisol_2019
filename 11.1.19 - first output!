@@ -1,0 +1,17 @@
+SELECT ?x  ?yLabel
+
+WHERE
+{ 
+	VALUES ?kb {wd:Q27117026 wd:Q223092 wd:Q27108680} #identifiers for bhb
+    VALUES ?cort {wd:Q190875}                          #cortisol identifier
+    VALUES ?hor {wd:Q11364} #hormones
+    VALUES ?acy {wd:Q715317} 
+  VALUES ?gen1 {wd:Q18030313}
+  VALUES ?gen2 {wd:Q17847967} # gene BDH1
+  
+  
+ ?gen2 wdt:P688 ?y; #p is encode
+   # ?gen1 ?x ?kb ; # what is their relationship (x)
+
+	SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
+}
