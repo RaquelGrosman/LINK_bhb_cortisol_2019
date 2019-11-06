@@ -1,0 +1,22 @@
+SELECT ?y ?yLabel ?x  
+
+WHERE
+{ 
+	#VALUES ?kb {wd:Q27117026 wd:Q223092 wd:Q27108680} #identifiers for bhb
+    #VALUES ?bhbd {wd:Q21111664 wd:Q21149343} # bhb dehydrogenase
+    #VALUES ?cort {wd:Q190875}                          #cortisol identifier
+    #VALUES ?hor {wd:Q11364} #hormones
+    #VALUES ?acy {wd:Q715317} 
+    VALUES ?gen1 {wd:Q18030313} # gene oxct1
+    VALUES ?gen2 {wd:Q17847967} # gene BDH1
+    VALUES ?gen3 {wd:Q14913201} # gene ACAT1
+    VALUES ?gen4 {wd:Q18033904} # gene SLC16A7
+    VALUES ?gen5 {wd:Q18035932} # gene DHRS4
+    VALUES ?gen6 {wd:Q18027029} # gene HMGCS2
+  
+   ?gen6 wdt:P688 ?y; #p688 is encode
+   
+   # ?gen1 ?x ?kb ; # what is their relationship (x)
+
+	SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
+}
