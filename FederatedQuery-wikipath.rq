@@ -1,0 +1,14 @@
+#usisng wikipathways as endpoint
+
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>  #make sure this is right
+PREFIX wd: <http://www.wikidata.org/entity>
+
+SELECT ?metabolite ?wikidata ?inchikey WHERE { 
+  ?metabolite a wp:Metabolite ;
+    wp:bdbWikidata ?wikidata .
+  SERVICE <https://query.wikidata.org/sparql> {   
+    ?wikidata wdt:P31 wd:Q746183 ;
+              wdt:P235 ?inchikey .    #this was super necessary because whithout it it did not run, found no variables ! 
+                                     #make sure your comments are descriptive enough
+  }
+} LIMIT 10
