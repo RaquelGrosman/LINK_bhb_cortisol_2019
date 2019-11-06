@@ -1,0 +1,14 @@
+SELECT  ?x ?xLabel ?is ?isLabel 
+
+WHERE
+{ 
+	VALUES ?kb {wd:Q27117026 wd:Q223092 wd:Q27108680} #identifiers for bhb
+    #VALUES ?bhbd {wd:Q21111664 wd:Q21149343} # bhb dehydrogenas
+    VALUES ?enzyme {wd:Q67015883}
+  
+   ?kb wdt:P31 ?x. # is instance of  wdt:c
+   ?x wdt:P279 ?is.
+   #?kb ?x ?enzyme.
+
+	SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
+}
