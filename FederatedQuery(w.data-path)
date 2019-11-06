@@ -11,9 +11,9 @@ WHERE {                                                              #where is w
               wdt:P235 ?inchikey .                                   #now wikidata known, adn getting inchikey- OUTPUT inchikey!                                                          
   }
   
-  ?metabolite a wp:Metabolite ;                          #metabolite "is a" (representaed by "a") w/ wikipathways (wp) metabolite id
-              wp:bdbWikidata ?wikidata ;                        #
-              dcterms:isPartOf ?pathway .                       #pathway output - dcterms is 
-  ?pathway a wp:Pathway ;                                            
-           foaf:page ?homepage .                                #homepage output
+  ?metabolite a wp:Metabolite ;                          #metabolite "is a" (representaed by "a" rdf:type) rdf is prefix w/ wikipathways (wp) metabolite id
+              wp:bdbWikidata ?wikidata ;                        # vocab change linking to wikidata (link-connector)
+              dcterms:isPartOf ?pathway .                       #pathway output - dcterms is predicate (dc- dubling core)telling it _isPartof  
+  ?pathway a wp:Pathway ;                                        #here again linking two resources... restrict - bcz can be part of many things we just want to see- know pathway    
+           foaf:page ?homepage .                                #homepage output - friend of a friend - link acosiated to your pathway
 }                                                                   #output is : metabolit, wikidata, inchikey, pathway, homepage
