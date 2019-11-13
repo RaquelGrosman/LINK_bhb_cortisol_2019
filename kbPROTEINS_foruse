@@ -1,0 +1,24 @@
+#federated query in wikipathways
+
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>                   #calling properties-wdt-added bcz here wikidat shortcuts arent recognized 
+PREFIX wd:  <http://www.wikidata.org/entity/>                        #calling entities - wd
+
+SELECT ?metabolite ?wikidata ?inchikey ?pathway ?homepage ?protein           #varables we want to get 
+WHERE {                                                              #where is where the query starts 
+  SERVICE <https://query.wikidata.org/sparql> {                      #Tells it where to look "federation",  this service is important to be in this order becasue if 
+                                                                      #we put it after that then it doesnt work. it says no variables
+    ?wikidata wdt:P31 wd:Q746183 ;                                   #instance of Q746183 (ketone bodies) finding wikidata OUTPUT!!!
+              wdt:P235 ?inchikey .                                   #now wikidata known, adn getting inchikey- OUTPUT inchikey!                                                          
+  }
+  
+  ?metabolite a wp:Metabolite ;                          #metabolite "is a" (representaed by "a" rdf:type) rdf is prefix w/ wikipathways (wp) metabolite id
+              wp:bdbWikidata ?wikidata ;                        # vocab change linking to wikidata (link-connector)
+              dcterms:isPartOf ?pathway .                       #pathway output - dcterms is predicate (dc- dubling core)telling it _isPartof  
+  ?pathway a wp:Pathway ;                                        #here again linking two resources... restrict - bcz can be part of many things we just want to see- know pathway    
+           foaf:page ?homepage .                            
+  ?protein a wp:Protein ;
+              dcterms:isPartOf ?pathway .
+  ?pathway wp:organismName "Homo sapiens"^^xsd:string .
+
+}                                                                   
+                                                  
