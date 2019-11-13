@@ -1,0 +1,265 @@
+var margin = {top: 10, right: 60, bottom: 10, left: 60},
+    width = 640 - margin.left - margin.right,
+    height = 3240 - margin.top - margin.bottom,
+    offsetTop = 180,
+    bodyHeight = d3.select(".graphic").node().getBoundingClientRect().height - offsetTop,
+    scrollTimeout,
+    scrolledRecently,
+    currentAnnotationIndex = -1;
+
+var y = d3.scale.pow()
+    .exponent(40)
+    .domain([1921, 2013])
+    .range([height, 0]);
+
+var force = d3.layout.force()
+    .gravity(0)
+    .charge(-120)
+    .chargeDistance(200)
+    .size([width, height]);
+
+var voronoi = d3.geom.voronoi()
+    .x(function(d) { return d.x; })
+    .y(function(d) { return d.y; })
+    .clipExtent([[-20, 0], [width + 20, height]]);
+
+var order = d3.scale.ordinal()
+    .domain(["film", "actor", "director"])
+    .range([0, 1, 2]);
+
+var annotation = d3.select(".graphic").selectAll(".annotation");
+
+var graphic = d3.select(".graphic").append("div")
+    .attr("class", "graphic-container");
+
+var svg = graphic.append("svg")
+    .attr("class", "graphic-element")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var tooltipOverlay = graphic.append("div")
+    .attr("class", "graphic-element tooltip")
+    .style("display", "none");
+
+var tooltipPath = tooltipOverlay.append("svg")
+    .attr("class", "tooltip-path");
+
+tooltipPath.append("path");
+
+var tooltipContent = tooltipOverlay.append("div")
+    .attr("class", "tooltip-content")
+    .style("position", "relative");
+
+var tooltipName = tooltipContent.append("div")
+    .attr("class", "tooltip-name");
+
+var tooltipDescription = tooltipContent.append("div")
+    .attr("class", "tooltip-description");
+
+var voronoiOverlay = graphic.append("svg")
+    .attr("class", "graphic-element voronoi")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(" + (width + margin.right) + ",0)")
+    .call(d3.svg.axis()
+      .scale(y)
+      .orient("right")
+      .tickSize(-width - margin.left - margin.right)
+      .tickFormat(function(d) { return d + "s"; }))
+  .selectAll(".tick text")
+    .style("text-anchor", "end")
+    .attr("dy", null)
+    .attr("x", null)
+    .attr("y", -6);
+
+var link = svg.append("g").selectAll(".link"),
+    node = svg.append("g").selectAll(".node");
+
+queue()
+    .defer(d3.json, "http://graphics8.nytimes.com/newsgraphics/2013/09/07/director-star-chart/ed9eaa686bc2e11f0657a78d9be292a730c0567a/graph.json")
+    .defer(d3.json, "http://graphics8.nytimes.com/newsgraphics/2013/09/07/director-star-chart/ed9eaa686bc2e11f0657a78d9be292a730c0567a/layout.json")
+    .await(ready);
+
+if ("ontouchstart" in window) {
+  d3.select(".tooltip").remove();
+  init = function() {
+    annotation.classed("highlight", true).each(function(active) {
+      force.nodes().forEach(function(d) { d.active |= (d === active); }); // activate director
+    });
+    link.classed("highlight", function(d) { return d.target.active |= d.source.active; }); // activate director’s films
+    force.links().forEach(function(d) { return d.source.active |= d.target.active; }); // activate directors’ films’ actors
+    node.classed("highlight", function(d) { return d.active; });
+  };
+} else {
+  var init = scrolled;
+
+  graphic
+      .style("position", "fixed");
+
+  d3.select(window)
+      .on("scroll", scrolled)
+      .on("resize", scrolled)
+      .on("keydown", keydowned);
+}
+
+function keydowned() {
+  if (d3.event.altKey || d3.event.metaKey) return;
+  var next = currentAnnotationIndex;
+  switch (d3.event.keyCode) {
+    case 39: if (next < annotation[0].length - 1) ++next; break;
+    case 37: if (next >= 0) --next; break;
+    default: return;
+  }
+  if (next !== currentAnnotationIndex) {
+    d3.transition()
+        .duration(350)
+        .tween("scrollTop", function() {
+          var s0 = window.pageYOffset || document.documentElement.scrollTop,
+              s1 = next < 0 ? 0 : Math.min(document.body.scrollHeight - innerHeight, s0 + annotation[0][next].getBoundingClientRect().top - innerHeight / 5),
+              i = d3.interpolateNumber(s0, s1);
+          return function(t) { scrollTo(0, i(t)); };
+        });
+  }
+  d3.event.preventDefault();
+}
+
+function scrolled() {
+  var offset = window.pageYOffset || document.documentElement.scrollTop;
+
+  scrolledRecently = true;
+  clearTimeout(scrollTimeout);
+  scrollTimeout = setTimeout(idled, 150);
+  graphic.style("top", offsetTop - offset * (1 + 1 / (bodyHeight - innerHeight) * (height - bodyHeight)) + "px");
+
+  if (offset > offsetTop / 2) for (var i = 0, n = annotation[0].length, a, r, active; i < n; ++i) {
+    a = annotation[0][i], r = a.getBoundingClientRect();
+    if (r.top > 0) { active = a.__data__; break; }
+  }
+
+  if (!active) return currentAnnotationIndex = -1, void d3.selectAll(".highlight").classed("highlight", false);
+  if (i === currentAnnotationIndex) return;
+  currentAnnotationIndex = i;
+  annotation.classed("highlight", function(d) { return d === active; });
+  force.nodes().forEach(function(d) { d.active = (d === active); }); // activate director
+  link.classed("highlight", function(d) { return d.target.active |= d.source.active; }); // activate director’s films
+  force.links().forEach(function(d) { return d.source.active |= d.target.active; }); // activate directors’ films’ actors
+  node.classed("highlight", function(d) { return d.active; });
+}
+
+function idled() {
+  scrolledRecently = false;
+}
+
+function ready(error, graph, positions) {
+  force
+      .nodes(graph.nodes)
+      .links(graph.links)
+      .on("tick", ticked)
+      .start();
+
+  if (positions) force.alpha(.0051);
+
+  var directors = graph.nodes.filter(function(d) { return d.type === "director"; }),
+      directorByName = d3.nest().key(function(d) { return d.name; }).rollup(function(v) { return v[0]; }).map(directors, d3.map),
+      actors = graph.nodes.filter(function(d) { return d.type === "actor"; }),
+      films = graph.nodes.filter(function(d) { return d.type === "film"; }),
+      positionedDirectors = [];
+
+  films.forEach(function(d) {
+    if (d.year) d.cy = d.y = d.py = y(d.year);
+    d.directors = [];
+    d.characters = [];
+  });
+
+  directors.forEach(function(d) {
+    switch (d.name) {
+      case "Bobby Farrelly": d.name = "The Farrelly brothers"; break;
+      case "Joel Coen": d.name = "The Coen brothers"; break;
+      case "Kar Wai Wong": d.name = "Wong Kar-wai"; break;
+    }
+    d.cy = d3.mean(graph.links.filter(function(l) { return l.source === d; }), function(l) { return l.target.cy; });
+  });
+
+  if (positions) graph.nodes.forEach(function(d, i) {
+    var position = positions[i];
+    d.x = d.px = position[0];
+    d.y = d.py = position[1];
+  });
+
+  graph.links.forEach(function(d) {
+    if (d.source.type === "director") {
+      d.target.directors.push(d.source);
+    } else {
+      d.target.characters.push(d);
+    }
+  });
+
+  link = link
+      .data(graph.links)
+    .enter().append("path")
+      .attr("class", "link");
+
+  node = node
+      .data(graph.nodes
+          .filter(function(d) { return d.type !== "film"; })
+          .sort(function(a, b) { return d3.ascending(order(a.type), order(b.type)); }))
+    .enter().append("text")
+      .attr("dy", ".35em")
+      .attr("class", function(d) { return "node " + d.type; })
+      .text(function(d) { return d.name; });
+
+  if (positions) {
+    voronoiOverlay.selectAll("a")
+      .data(voronoi(films))
+    .enter().append("a")
+      .attr("xlink:href", function(d) { return "http://www.imdb.com/title/" + d.point.id + "/"; })
+    .append("path")
+      .attr("d", function(d) {
+        var p = d.point, r = 20, x0 = p.x + r, y0 = p.y - r, x1 = p.x - r, y1 = p.y + r;
+        return "M" + d3.geom.polygon([[x0, y0], [x1, y0], [x1, y1], [x0, y1]]).clip(d).join("L") + "Z";
+      })
+      .datum(function(d) { return d.point; })
+      .style("fill", "none")
+      .style("pointer-events", "all")
+      .on("mouseover", mouseovered)
+      .on("mouseout", mouseouted);
+  } else {
+    d3.selectAll(".voronoi,.tooltip").remove();
+    node.call(force.drag);
+  }
+
+  annotation
+      .datum(function() { return directorByName.get(this.getAttribute("data-director")); })
+      .call(init);
+
+  function ticked(e) {
+    var alphaY = .40 * e.alpha,
+        alphaX = .10 * e.alpha;
+
+    directors.forEach(function(d) {
+      d.x += (width / 2 - d.x) * alphaX;
+      d.y += (d.cy - d.y) * alphaY;
+    });
+
+    graph.nodes.forEach(function(d) {
+      if (d.y < 0) d.y = 0; else if (d.y > height) d.y = height;
+      if (d.x < 0) d.x = 0; else if (d.x > width) d.x = width;
+    });
+
+    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+    link.attr("d", function(d) { return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y; });
+  }
+
+  function mouseouted() {
+    tooltipOverlay.style("display", "none");
+    node.classed("hover", false);
+    link.classed("hover", false);
+  }
+}
