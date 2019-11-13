@@ -1,0 +1,71 @@
+data = []
+
+url = "http://sparql.wikipathways.org/"
+query =   `
+  SELECT ?pathway WHERE { ?pathway a wp:Pathway } 
+`
+var queryUrl = encodeURI( url+"?query="+query );   //calls query
+fetch( queryUrl, {headers: {"Accept": 'application/json'}} ) // here it runs query 
+  .then( response => response.json() )
+  .then( wdk.simplify.sparqlResults )
+  .then( function (response) {
+      console.log(
+        JSON.stringify(response, undefined, 2)
+      )
+    }
+  )
+
+height 
+width
+
+colors = [ "red", "green" ]
+
+const links = data.links.map(d => Object.create(d));
+  const nodes = data.nodes.map(d => Object.create(d));
+
+  const simulation = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id(d => d.id))
+      .force("charge", d3.forceManyBody())
+      .force("center", d3.forceCenter(width / 2, height / 2));
+
+  const svg = d3.create("svg")
+      .attr("viewBox", [0, 0, width, height]);
+
+  const link = svg.append("g")
+      .attr("stroke", "#999")
+      .attr("stroke-opacity", 0.6)
+    .selectAll("line")
+    .data(links)
+    .join("line")
+      .attr("stroke-width", d => Math.sqrt(d.value));
+
+  const node = svg.append("g")
+      .attr("stroke", "#fff")
+      .attr("stroke-width", 1.5)
+    .selectAll("circle")
+    .data(nodes)
+    .join("circle")
+      .attr("r", 5)
+      .attr("fill", function(d) { return colors[d.group-1]} ) //right part is calling the colors, -1 bc indexing, fun(d) returs color on input d - d is node were looking at 
+      .call(drag(simulation));
+
+  node.append("title")
+      .text(d => d.id);
+
+  simulation.on("tick", () => {
+    link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+    node
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
+  });
+  
+  try drag
+  
+  document.getElementById("foo").appendChild(svg.node()) // - instead of .inner text 0 returns SVG node
+  
+  interacting genes - sp - uri - document is html page - select something by id - 
