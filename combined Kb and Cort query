@@ -1,0 +1,27 @@
+
+#federated query in wikipathways
+
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>                  
+PREFIX wd:  <http://www.wikidata.org/entity/>                      
+
+SELECT ?metabolite ?wikidata ?inchikey ?pathway ?homepage ?protein           
+WHERE {                                                              
+  SERVICE <https://query.wikidata.org/sparql> {                     
+    VALUES ?cort {wd:Q190875}   
+     ?cort wdt:P235 ?inShitkey                                                         
+    ?wikidata wdt:P31 wd:Q746183 ;                                  
+              wdt:P235 ?inchikey .                                                                                        
+  }
+  
+  ?metabolite a wp:Metabolite ;                       
+              wp:bdbWikidata ?wikidata ;
+              dcterms:isPartOf ?pathway . 
+  ?hormone a wp:Metabolite;
+            wp:bdbWikidata ?cort;
+          dcterms:isPartOf ?pathway.
+  ?pathway a wp:Pathway ;                                       
+           foaf:page ?homepage .                                
+  ?protein a wp:Protein ;
+              dcterms:isPartOf ?pathway .
+}                                                            
+
