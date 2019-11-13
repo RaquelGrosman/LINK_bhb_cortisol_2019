@@ -4,18 +4,20 @@
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>                   #calling properties-wdt-added bcz here wikidat shortcuts arent recognized 
 PREFIX wd:  <http://www.wikidata.org/entity/>                        #calling entities - wd
 
-SELECT  ?metabolite ?wikidata ?inchikey ?pathway ?homepage ?protein                                                   #varables we want to get 
+SELECT  ?metaboliteLabel ?wikidata ?inchikey ?pathway ?homepage ?protein ?proteinLabel                                                  #varables we want to get 
 WHERE {                                                              #where is where the query starts 
   SERVICE <https://query.wikidata.org/sparql> {                      #Tells it where to look "federation",  this service is important to be in this order becasue if 
     VALUES ?wikidata { wd:Q190875 }                                  #variable stating : wikidata is cortisol (Q190875)
     ?wikidata wdt:P235 ?inchikey .                                   #now wikidata known, and getting inchikey- OUTPUT inchikey!                                                          
   }
   ?metabolite a wp:Metabolite ;                          #metabolite "is a" (representaed by "a" rdf:type) rdf is prefix w/ wikipathways (wp) metabolite id
+              rdfs:label ?metaboliteLabel ;
               wp:bdbWikidata ?wikidata ;                        # vocab change linking to wikidata (link-connector)
               dcterms:isPartOf ?pathway .                       #pathway output - dcterms is predicate (dc- dubling core)telling it _isPartof  
   ?pathway a wp:Pathway ;                                        #here again linking two resources... restrict - bcz can be part of many things we just want to see- know pathway    
            foaf:page ?homepage .                                #homepage output - friend of a friend - link acosiated to your pathway
   ?protein a wp:Protein ;
+              rdfs:label ?proteinLabel ;
               dcterms:isPartOf ?pathway .
  ?pathway wp:organismName "Homo sapiens"^^xsd:string .
 }
