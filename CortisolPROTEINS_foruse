@@ -1,16 +1,15 @@
- 
 #federated query in wikipathways
 
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>                   #calling properties-wdt-added bcz here wikidat shortcuts arent recognized 
 PREFIX wd:  <http://www.wikidata.org/entity/>                        #calling entities - wd
 
-SELECT  ?metaboliteLabel ?wikidata ?inchikey ?pathway ?homepage ?protein ?proteinLabel                                                  #varables we want to get 
+SELECT  ?inchikey ?hgnc                                             #varables we want to get ?pathway ?homepage ?protein ?proteinLabel ?metaboliteLabel ?wikidata 
 WHERE {                                                              #where is where the query starts 
   SERVICE <https://query.wikidata.org/sparql> {                      #Tells it where to look "federation",  this service is important to be in this order becasue if 
     VALUES ?wikidata { wd:Q190875 }                                  #variable stating : wikidata is cortisol (Q190875)
     ?wikidata wdt:P235 ?inchikey .                                   #now wikidata known, and getting inchikey- OUTPUT inchikey!                                                          
   }
-  ?metabolite a wp:Metabolite ;                          #metabolite "is a" (representaed by "a" rdf:type) rdf is prefix w/ wikipathways (wp) metabolite id
+  ?metabolite a wp:Metabolite ;                                #metabolite "is a" (representaed by "a" rdf:type) rdf is prefix w/ wikipathways (wp) metabolite id
               rdfs:label ?metaboliteLabel ;
               wp:bdbWikidata ?wikidata ;                        # vocab change linking to wikidata (link-connector)
               dcterms:isPartOf ?pathway .                       #pathway output - dcterms is predicate (dc- dubling core)telling it _isPartof  
@@ -18,6 +17,7 @@ WHERE {                                                              #where is w
            foaf:page ?homepage .                                #homepage output - friend of a friend - link acosiated to your pathway
   ?protein a wp:Protein ;
               rdfs:label ?proteinLabel ;
+              wp:bdbHgncSymbol ?hgnc;                          #so we get the proteins with the same name always 
               dcterms:isPartOf ?pathway .
  ?pathway wp:organismName "Homo sapiens"^^xsd:string .
 }
