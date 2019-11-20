@@ -12,7 +12,7 @@
 
 url = "http://sparql.wikipathways.org/"
 
-query = `
+queryCORT = `
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>                   
 PREFIX wd:  <http://www.wikidata.org/entity/>                  
 SELECT  ?inchikey ?hgnc                                              
@@ -35,23 +35,65 @@ WHERE {
  ?pathway wp:organismName "Homo sapiens"^^xsd:string .
 }
 `
-var queryUrl = encodeURI( url+"?query="+query );
-fetch( queryUrl, {headers: {"Accept": 'application/json'}} )
+var queryUrlc = encodeURI( url+"?query="+queryCORT );
+fetch( queryUrlc, {headers: {"Accept": 'application/json'}} )
   .then( response => response.json() )
   .then( wdk.simplify.sparqlResults )
   .then( function (response) {
       console.log(
         JSON.stringify(response, undefined, 2)
       )
-	  document.getElementById("data").innerHTML =  JSON.stringify(response, undefined, 2) 
-		var data = response
+	  document.getElementById("cortisol").innerHTML =  JSON.stringify(response, undefined, 2) 
+		var dataCORT = response
     }
   )
   
+  queryKB = `
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>                    
+PREFIX wd:  <http://www.wikidata.org/entity/>                        
+
+SELECT ?inchikey ?hgnc                                                 
+WHERE {                                                              
+  SERVICE <https://query.wikidata.org/sparql> {                      
+                                                                      
+    ?wikidata wdt:P31 wd:Q746183 ;                                   
+              wdt:P235 ?inchikey .                                                          
+  }
+  
+  ?metabolite a wp:Metabolite ;                               
+              rdfs:label ?metaboliteLabel ;
+              wp:bdbWikidata ?wikidata ;                        
+              dcterms:isPartOf ?pathway .                       
+  ?pathway a wp:Pathway ;                                          
+           foaf:page ?homepage .                            
+  ?protein a wp:Protein ;
+              rdfs:label ?proteinLabel ;
+              wp:bdbHgncSymbol ?hgnc ;                          
+              dcterms:isPartOf ?pathway .
+  ?pathway wp:organismName "Homo sapiens"^^xsd:string .
+
+} 
+  `
+ var queryUrlkb = encodeURI( url+"?query="+queryKB );
+fetch( queryUrlkb, {headers: {"Accept": 'application/json'}} )
+  .then( response => response.json() )
+  .then( wdk.simplify.sparqlResults )
+  .then( function (response) {
+      console.log(
+        JSON.stringify(response, undefined, 2)
+      )
+	  document.getElementById("ketones").innerHTML =  JSON.stringify(response, undefined, 2) 
+		var dataKB = response
+    }
+  ) 
   </script>
   
   
-  <div id="data">
+  <div id="cortisol">
+  
+  
+  </div>
+  <div id="ketones">
   
   
   </div>
