@@ -8,25 +8,29 @@ var queryUrl = encodeURI( url+"?query="+query );   //calls query
 fetch( queryUrl, {headers: {"Accept": 'application/json'}} ) // here it runs query 
   .then( response => response.json() )
   .then( wdk.simplify.sparqlResults )
-  .then( function (response) {
-      console.log(
-        JSON.stringify(response, undefined, 2)
-      )
+  .then( function (response) {// response is data 
+      console.log(   //to see response ogject 
+      JSON.stringify(response, undefined, 2))
+     //visualize(response) // generating visualazation from response
+      
     }
   )
 
-height 
+/* height 
 width
 
 colors = [ "red", "green" ]
 
-const links = data.links.map(d => Object.create(d));
-  const nodes = data.nodes.map(d => Object.create(d));
+function visualize(p1) {   //create function - d3 starts - use d3 functions to split data
 
-  const simulation = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id))
-      .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter(width / 2, height / 2));
+
+const links = data.links.map(d => Object.create(d));
+const nodes = data.nodes.map(d => Object.create(d));
+
+ // const simulation = d3.forceSimulation(nodes)     // reshape thing
+   //   .force("link", d3.forceLink(links).id(d => d.id))
+     // .force("charge", d3.forceManyBody())
+      //.force("center", d3.forceCenter(width / 2, height / 2));
 
   const svg = d3.create("svg")
       .attr("viewBox", [0, 0, width, height]);
@@ -63,9 +67,12 @@ const links = data.links.map(d => Object.create(d));
         .attr("cx", d => d.x)
         .attr("cy", d => d.y);
   });
-  
+ } // close function 
   try drag
   
   document.getElementById("foo").appendChild(svg.node()) // - instead of .inner text 0 returns SVG node
   
   interacting genes - sp - uri - document is html page - select something by id - 
+  
+   
+ */
