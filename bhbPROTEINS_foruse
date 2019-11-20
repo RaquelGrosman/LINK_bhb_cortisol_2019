@@ -3,7 +3,7 @@
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>                   #calling properties-wdt-added bcz here wikidat shortcuts arent recognized 
 PREFIX wd:  <http://www.wikidata.org/entity/>                        #calling entities - wd
 
-SELECT ?metaboliteLabel ?wikidata ?inchikey ?pathway ?homepage ?protein ?proteinLabel           #varables we want to get 
+SELECT ?inchikey ?hgnc                                               #varables we want to get ?metaboliteLabel ?wikidata  ?pathway ?homepage ?protein ?proteinLabel  
 WHERE {                                                              #where is where the query starts 
   SERVICE <https://query.wikidata.org/sparql> {                      #Tells it where to look "federation",  this service is important to be in this order becasue if 
                                                                       #we put it after that then it doesnt work. it says no variables
@@ -11,7 +11,7 @@ WHERE {                                                              #where is w
               wdt:P235 ?inchikey .                                   #now wikidata known, adn getting inchikey- OUTPUT inchikey!                                                          
   }
   
-  ?metabolite a wp:Metabolite ;                          #metabolite "is a" (representaed by "a" rdf:type) rdf is prefix w/ wikipathways (wp) metabolite id
+  ?metabolite a wp:Metabolite ;                                #metabolite "is a" (representaed by "a" rdf:type) rdf is prefix w/ wikipathways (wp) metabolite id
               rdfs:label ?metaboliteLabel ;
               wp:bdbWikidata ?wikidata ;                        # vocab change linking to wikidata (link-connector)
               dcterms:isPartOf ?pathway .                       #pathway output - dcterms is predicate (dc- dubling core)telling it _isPartof  
@@ -19,9 +19,9 @@ WHERE {                                                              #where is w
            foaf:page ?homepage .                            
   ?protein a wp:Protein ;
               rdfs:label ?proteinLabel ;
+              wp:bdbHgncSymbol ?hgnc ;                          # to standerdize protein names
               dcterms:isPartOf ?pathway .
   ?pathway wp:organismName "Homo sapiens"^^xsd:string .
 
 }                                                                   
                                                    
- 
