@@ -12,6 +12,10 @@
 <script>
 var dataCORT = [];
 var dataKB = [];
+var nodes = []; // creating array for node data (first will be protein/metabolite, second is the group)
+var links = []; // data needed for links array 
+var data = [];
+var array = [];
 
 url = "http://sparql.wikipathways.org/"
 
@@ -25,6 +29,7 @@ WHERE {
     VALUES ?wikidata { wd:Q190875 }                                  
     ?wikidata wdt:P235 ?inchikey .                                                                                             
  }
+  ?metabolite a wp:Metabolite ;                                
   ?metabolite a wp:Metabolite ;                                
               rdfs:label ?metaboliteLabel ;
               wp:bdbWikidata ?wikidata ;
@@ -51,7 +56,8 @@ fetch( queryUrlc, {headers: {"Accept": 'application/json'}} )
 	.then( wdk.simplify.sparqlResults )
 	.then( function (response) {
 	 dataKB = response;
-		getAll(dataCORT, dataKB);	
+	 data = dataCORT.concat(dataKB);
+	getAll(data);	
       console.log(
         JSON.stringify(response, undefined, 2)
       )
@@ -93,15 +99,12 @@ WHERE {
 
 } 
   ` 
-  var nodes = ([],[]); // creating array for node data (first will be protein/metabolite, second is the group)
-  var links = ([],[]); // data needed for links array 
+  
   
  
 
- function getAll(dataCORT, dataKB){
+ function getAll(data){
  // initialazing variables
-  var data = dataKB.push(dataCORT);
-
   
   function label(identifier){ // function made so we can change the query output to a readable (for humans and d3) output 
    var idLabel;
@@ -110,38 +113,44 @@ WHERE {
 	}else if(identifier === "JYGXADMDTFJGBT-VWUMJDOOSA-N" ){
 			idLabel = "Cortisol";
 	}else{
-		identifier.slice(35, data[i].hgnc.length);
+		idLabel = identifier.substring(35, identifier.length);
 	}
-	return idLabel
+	return idLabel;
   }
+  
   
   function isRepeated(row,array){
 		for(i=0; i < array.length; i++){
-			if([array[i][0],array[i][1]] == row){
+			if(array[i] === row){
 			return true;
 		}
 	}return false;
   }
   
-  var countN = 0;  // to count nodes
-  var countL = 0;  // to count links 
+/*  
+	for(i = 0; i < data.length; i++) {
+		if(!array.includes(data[i])) {
+			array.push(data[i]);
+		}
+	}
+	for(i = 0;i < array.length; i++){
+		links.push([label(array[i].inchikey) , label(array[i].hgnc)]);
+	}
+ */
 	
 	//making of new arrays: NODES and LINKS - with new labels 
 	for(i = 0; i < data.length; i++) {
 		if (!isRepeated([label(data[i].inchikey), label(data[i].hgnc)], links)){		
-			links[countL][0] = label(data[i].inchikey);    //go down the data and plug into new arrays the met, and proteins of their links (0, 1 respectively)
-			links[countL][1] = label(data[i].hgnc); //go down the data and plug into new arrays the met, and proteins of their links (0, 1 respectively)
-			countL++;
-		}
+			links.push([label(data[i].inchikey), label(data[i].hgnc)]);    //go down the data and plug into new arrays the met, and proteins of their links 0, 1 respectively
+			
 		if (!nodes.includes(label(data[i].inchikey))){   //to check if data is in new array, if it is dont add, if it is not, ADD (for nodes including met, and pro)
-			nodes[countN][0] = label(data[i].inchikey); 
-		countN++;
+			nodes.push([label(data[i].inchikey)]); 
 		}
 		if (!nodes.includes(label(data[i].hgnc))){	
-			nodes[countN][0] = label(data[i].hgnc);
-		countN++;
+			nodes.push([label(data[i].hgnc)]);
 		}
 	}
+	
  
  
 //making groups for Nodes array
@@ -167,6 +176,7 @@ WHERE {
 	
 	}
 }
+
 	//document.getElementById("cortisol").innerHTML = links;
 	console.log(links);
 	// there is something wrong with out data
