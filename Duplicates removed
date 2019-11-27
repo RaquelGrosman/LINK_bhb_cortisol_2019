@@ -1,0 +1,227 @@
+<html>
+	<head>
+	  <!-- Initialize a global WBK function -->
+	  <script src="https://cdn.rawgit.com/maxlath/wikidata-sdk/dist/dist/wikibase-sdk.min.js"></script>
+	  <!-- Initialize a global wdk object using the WBK object -->
+	  <script src="https://cdn.rawgit.com/maxlath/wikidata-sdk/dist/dist/wikidata-sdk.min.js"></script>
+	</head>
+
+<body>
+<div id="foo" />
+
+<script>
+	var dataCORT = [];
+	var dataKB = [];
+	var nodes = []; // creating array for node data (first will be protein/metabolite, second is the group)
+	var links = []; // data needed for links array 
+	var data = [];
+	var distinctData = [];
+	var dataStrings = [];
+	var distinctDataStrings = [];
+	var nodesString = []; 
+	var linksString = [];
+
+	url = "http://sparql.wikipathways.org/"
+
+	queryCORT = `
+	PREFIX wdt: <http://www.wikidata.org/prop/direct/>                   
+	PREFIX wd:  <http://www.wikidata.org/entity/>                  
+	SELECT  ?inchikey ?hgnc                                              
+	WHERE {                                                              
+	  SERVICE <https://query.wikidata.org/sparql>   
+	  {
+		VALUES ?wikidata { wd:Q190875 }                                  
+		?wikidata wdt:P235 ?inchikey .                                                                                             
+	 }
+	  ?metabolite a wp:Metabolite ;                                                          
+				  rdfs:label ?metaboliteLabel ;
+				  wp:bdbWikidata ?wikidata ;
+				  dcterms:isPartOf ?pathway .                       
+	  ?pathway a wp:Pathway ;                                      
+			   foaf:page ?homepage .                               
+	  ?protein a wp:Protein ;
+				  rdfs:label ?proteinLabel ;
+				  wp:bdbHgncSymbol ?hgnc;                          
+				  dcterms:isPartOf ?pathway .
+	 ?pathway wp:organismName "Homo sapiens"^^xsd:string .
+	}
+	`
+
+	var queryUrlc = encodeURI( url+"?query="+queryCORT );
+	fetch( queryUrlc, {headers: {"Accept": 'application/json'}} )
+	  .then( response => response.json() )
+	  .then( wdk.simplify.sparqlResults )
+	  .then( function (response) {  // assign other data...
+	  //put the ssecond fetch with fx inside
+	  dataCORT = response;
+	  
+	var queryUrlkb = encodeURI( url+"?query="+queryKB );
+    fetch( queryUrlkb, {headers: {"Accept": 'application/json'}} )
+      .then( response => response.json() )
+	  .then( wdk.simplify.sparqlResults )
+	  .then( function (response) {
+	  dataKB = response;
+	  
+	  data = dataCORT.concat(dataKB);
+	  getAll(data);	
+	  
+      console.log(
+		JSON.stringify(response, undefined, 2)
+		  )
+		//  document.getElementById("ketones").innerHTML =  JSON.stringify(response, undefined, 2) 
+			
+		}
+	  )
+	  console.log(
+		JSON.stringify(response, undefined, 2)
+		  )
+		 // document.getElementById("cortisol").innerHTML =  JSON.stringify(response, undefined, 2) 
+		   
+		}
+	  )
+	  
+	queryKB = `
+	PREFIX wdt: <http://www.wikidata.org/prop/direct/>                    
+	PREFIX wd:  <http://www.wikidata.org/entity/>                        
+
+	SELECT ?inchikey ?hgnc                                                 
+	WHERE {                                                              
+	  SERVICE <https://query.wikidata.org/sparql> {                      
+																		  
+		?wikidata wdt:P31 wd:Q746183 ;                                   
+				  wdt:P235 ?inchikey .                                                          
+	  }
+	  
+	  ?metabolite a wp:Metabolite ;                               
+				  rdfs:label ?metaboliteLabel ;
+				  wp:bdbWikidata ?wikidata ;                        
+				  dcterms:isPartOf ?pathway .                       
+	  ?pathway a wp:Pathway ;                                          
+			   foaf:page ?homepage .                            
+	  ?protein a wp:Protein ;
+				  rdfs:label ?proteinLabel ;
+				  wp:bdbHgncSymbol ?hgnc ;                          
+				  dcterms:isPartOf ?pathway .
+	  ?pathway wp:organismName "Homo sapiens"^^xsd:string .
+
+	} 
+	  ` 
+	  
+	  
+ 
+
+    function getAll(data){
+ 
+  
+		function label(identifier){ // function made so we can change the query output to a readable (for humans and d3) output 
+			var idLabel;
+			
+			if (identifier === "WDJHALXBUFZDSR-UHFFFAOYSA-N") {
+				idLabel = "BHB";
+			} else if (identifier === "JYGXADMDTFJGBT-VWUMJDOOSA-N" ){
+				idLabel = "Cortisol";
+			} else if (identifier === undefined || identifier === null) {
+				idLabel = "Undefined";
+			} else {
+				idLabel = identifier.slice(35);
+			}
+			
+			return idLabel;
+	    } 
+	  
+
+	
+		data.forEach(object => dataStrings.push(object.inchikey + object.hgnc)); //make an array of strings of the objects in data
+		
+		const unique = (value, index, self) => { //how does this work?
+			return self.indexOf(value) === index
+		}
+		
+		distinctDataStrings = dataStrings.filter(unique); //find unique values in dataStrings
+		
+		//creating object from each element in the arrray of strings
+		
+		
+		for(var i = 0; i < distinctDataStrings.length; i++) {
+			var dataPoint = new Object();
+			dataPoint.inchikey = distinctDataStrings[i].slice(0, 27);
+			dataPoint.hncg = distinctDataStrings[i].slice(28);
+			distinctData.push(dataPoint);
+		}
+
+		//WHBMMWSBFZVSSR-GSVOUGTGSA-N 27 characters
+		//JYGXADMDTFJGBT-VWUMJDOOSA-N
+		
+		
+		//make arrays of Strings for both nodes and links in order to avoid adding duplicates to the real nodes and links arrays
+		
+
+
+		//add elements to nodes and links arrays
+		for(var i = 0; i < distinctData.length; i++) {
+		
+			if(!nodesString.includes(label(distinctData[i].inchikey))) {
+				nodesString.push(label(distinctData[i].inchikey));
+				var node = new Object();
+				node.id = label(distinctData[i].inchikey);
+				nodes.push(node);
+			}
+			
+			if(!nodesString.includes(label(distinctData[i].hgnc))) {
+				nodesString.push(label(distinctData[i].hgnc));
+				var node = new Object();
+				node.id = label(distinctData[i].hgnc);
+				nodes.push(node);
+			}
+			
+			var link = new Object();
+			link.source = distinctData[i].inchikey;
+			link.target = distinctData[i].hgnc;
+		}
+		
+
+
+		
+		//add property group number for BHB and Cortisol. Can it be abstracted?
+		for (var i = 0; i < nodes.length; i++) {
+			if (nodes[i].id === "Cortisol") {
+				nodes[i].group = 1;
+			} else if (nodes[i].id === "BHB") {
+				nodes[i].group = 2;
+			} else {
+				for (var j = 0; links.length; j++) {
+					if (links[j].target === nodes[i].id) {
+						if (links[j].source === "Cortisol") {
+							nodes[i].group = 3;
+						} else if (links[j].source === "BHB") {
+							if (nodes[i].group === 3) {
+								nodes[i].group = 5;
+							} else {
+								nodes[i].group = 4;
+							}
+						}
+					}
+				}
+			}
+		}
+ 
+
+
+	//document.getElementById("cortisol").innerHTML = links;
+	console.log(links);
+	
+	}
+
+  </script>
+  
+  
+  <div id="cortisol">
+  
+  
+  </div>
+  <div id="ketones">
+  
+  
+  </div>
+  </body>
+</html>
