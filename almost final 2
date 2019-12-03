@@ -1,32 +1,33 @@
 <html>
   <style>
-	  body {
+	body {
 		font-family: verdana;
 		margin: 100;
 		background-color:e3e3e3;
 	  }
 	  
 	  .legend {
-		  width:300px;
-		  height: 400px;
-		  float: left;
-		  padding: 20;
+		  padding: 20px;
 		  flex: 30%;
 	  }
 	  
 	  .infobox {
-	    width:900px;
-		height: 400px;
-		float: right;
-		padding: 20;
-		flex: 70%;
+		padding: 20px;
+		flex: 50%;
+		background-color: #f1f1f1;
 	  }
 		
-	  footer {
+	  .row {  
+	    display: flex;
+	    flex-wrap: wrap;
+	  }
 	  
+	  footer {
+		padding-top: 100px;
+		text-align: center;
 	  }
   </style>
-  
+
   <head>
 	  <title>Ketone Bodies Cortisol</title>
 	  <!-- Initialize a global WBK function -->
@@ -218,7 +219,7 @@
 							}
 						}
 					}
-					
+
 				}
 
 			data.nodes = nodes;
@@ -245,10 +246,7 @@
 				   .force("charge", d3.forceManyBody().strength(-20)) //for making elements attract or repel one another default -30
 				   .force("center", d3.forceCenter(width / 2 + 100, height / 2)); //for setting the center of gravity of the system
 
-				simulation.on("tick", tickActions);
-
-
-				  const link = svg.append("g") // shaping the links 
+				const link = svg.append("g") // shaping the links 
 					  .attr("stroke", "#999")
 					  .attr("stroke-opacity", 0.6)
 					.selectAll("line")
@@ -256,92 +254,93 @@
 					.join("line")
 					  .attr("stroke-width", d => Math.sqrt(d.value));
 
-				  const node = svg.append("g") // shaping nodes
+				const node = svg.append("g") // shaping nodes
 					  .attr("stroke", "#fff")
 					  .attr("stroke-width", 1.5)
 						.selectAll("circle")
 						.data(viznodes)
 						.join("circle")
 					  .attr("r", 5)
-					  .attr("fill", function(d) { return colors[d.group-1]} ); // assigning colors; -1 bc color array indexing starts at 0 while groups start at 1, fun(d) returs color on input d
-
-				  var drag_handler = d3.drag()
-						.on("start", drag_start)
-						.on("drag", drag_drag)
-						.on("end", drag_end);	
-
-					//same as using .call on the node variable as in the reference 
-					drag_handler(node);
-
-					//drag handler
-					//d is the node 
-					function drag_start(d) {
-					 if (!d3.event.active) simulation.alphaTarget(0.3	).restart();
-					   d.fx = d.x;
-					   d.fy = d.y;
-					}
-
-					function drag_drag(d) {
-					  d.fx = d3.event.x;
-					  d.fy = d3.event.y;
-					}
-
-
-					function drag_end(d) {
-					  if (!d3.event.active) simulation.alphaTarget(0);
-					  d.fx = null;
-					  d.fy = null;
-					}
-
-
-				  node.append("title") // assign each node's id as a node title in the diagram
-					  .text(d => d.id);
-
-				  function tickActions() {
-					//update circle positions each tick of the simulation 
-					node
-						.attr("cx", function(d) { return d.x; })
-						.attr("cy", function(d) { return d.y; });
-
-					//update link positions 
-					//simply tells one end of the line to follow one node around
-					//and the other end of the line to follow the other node around
+					  .attr("fill", function(d) { return colors[d.group-1]} ) // assigning colors; -1 bc color array indexing starts at 0 while groups start at 1, fun(d) returs color on input d
+					  .call(drag(simulation));
+				
+				function drag(simulation){
+				
+					function dragstarted(d) {
+						if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+						d.fx = d.x;
+						d.fy = d.y;
+					  }
+					  
+					  function dragged(d) {
+						d.fx = d3.event.x;
+						d.fy = d3.event.y;
+					  }
+					  
+					  function dragended(d) {
+						if (!d3.event.active) simulation.alphaTarget(0);
+						d.fx = null;
+						d.fy = null;
+					  }
+					  
+					  return d3.drag()
+						  .on("start", dragstarted)
+						  .on("drag", dragged)
+						  .on("end", dragended);
+				
+				}
+				
+				simulation.on("tick", () => {
+				
+				//update link positions 
+				//simply tells one end of the line to follow one node around
+				//and the other end of the line to follow the other node around
 					link
 						.attr("x1", function(d) { return d.source.x; })
 						.attr("y1", function(d) { return d.source.y; })
 						.attr("x2", function(d) { return d.target.x; })
 						.attr("y2", function(d) { return d.target.y; });
-				  } 
+				
+				//update circle positions each tick of the simulation 
+					node
+						.attr("cx", function(d) { return d.x; })
+						.attr("cy", function(d) { return d.y; });
+						
+				});
 
-			  document.getElementById("foo").appendChild(svg.node());
+				  node.append("title") // assign each node's id as a node title in the diagram
+					  .text(d => d.id);
+
+				document.getElementById("foo").appendChild(svg.node());
+				
 			 } 
 
 
 		</script>
 	  </div>
+		<div class="row">
+		  <div class="legend">
+			  <h2>COLOR CODES: </h2>
+				<ul type="none">
+				  <li style="color:red">Cortisol</li>
+				  <li style="color:purple">Enzyme(s) linked to cortisol</li>
+				  <li style="color:blue">Beta-hydroxybutyrate (BHB)</li>
+				  <li style="color:yellow">Enzyme(s) linked to BHB</li>
+				  <li style="color:green">Acetoacetate (ACA)</li>
+				  <li style="color:pink">Enzyme(s) linked to ACA</li>
+				  <li style="color:orange">MAOA</li>
+				</ul>
+		  </div>
 
-	  <div class="legend">
-		  <h2>COLOR CODES</h2>
-			<ul type="none">
-			  <li style="color:red">Cortisol</li>
-			  <li style="color:purple">Enzyme linked to cortisol</li>
-			  <li style="color:blue">BHB</li>
-			  <li style="color:yellow">Enzyme linked to BHB</li>
-			  <li style="color:green">ACA</li>
-			  <li style="color:pink">Enzyme linked to ACA</li>
-			  <li style="color:orange">MAOA</li>
-			</ul>
-	  </div>
-	  
-	  <div class="infobox">
-		  <h2>Description of the project</h2>
-		  <p>In this project, we tried to find a conenction between ketone bodies and cortisol in our bodies. According to studies (cite), ketogenic diet might have an effect
-		  on cortisol. We queried data from WikiPathways and WikiData. This data contains proteins associated with acetoacetate, BHB and cortisol. With this method, we succeded
-		  to find one connecting enzyme, MAOA. MAOA .... </p>
-	  </div>
-	  
-	  <footer>
-		  <p>namez names names</p>
+		  <div class="infobox">
+			  <h2>Description of the project</h2>
+			  <p>In this project, we tried to find a conenction between ketone bodies and cortisol in our bodies. According to studies (cite), ketogenic diet might have an effect
+			  on cortisol. We queried data from WikiPathways and WikiData. This data contains proteins associated with acetoacetate, BHB and cortisol. With this method, we succeded
+			  to find one connecting enzyme, MAOA. MAOA .... </p>
+		  </div>
+		</div>
+	  <div class="footer">
+		  <p>Raquel Grosman Cordero ; Maija Utriainen ; Yann Laroche</p>
 		  <a href="https://www.wikipathways.org/index.php/WikiPathways">
 		  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Wplogo_with_text_500.png/150px-Wplogo_with_text_500.png" alt="WikiPathways logo" width="110" height="100"/>
 		  </a>
@@ -351,7 +350,7 @@
 		  <a href="https://github.com/RaquelGrosman/PRA3006_2019">
 		  <img src="https://www.icescrum.com/wp-content/uploads/2018/10/github.png" alt="GitHub logo" width="130" height="100"/>
 		  </a>
-	  </footer>
+	  </div>
 
 	</body>
 </html>
