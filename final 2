@@ -1,0 +1,411 @@
+<html>
+
+  <!-- styling the web page elements -->
+  <style> 
+	  body {
+		font-family: verdana;
+		margin: 100;
+		background-color:e3e3e3;
+		text-align: center;
+	  }
+	  
+	  .legend {
+		padding: 20px;
+		flex: 20%; <!-- width 30% -->
+	  }
+	  
+	  .infobox { <!-- description of the project -->
+		padding: 20px;
+		flex: 40%;
+		background-color: #f1f1f1;
+	  }
+		
+	  .row {  <!-- creates an element containing infobox and legend, which take a percentage of the space -->
+	    display: flex;
+	    flex-wrap: wrap;
+	  }
+	  
+	  footer {
+		padding-top: 100px;
+		text-align: center;
+	  }
+
+  </style>
+  
+  <head>
+	  <title>Ketone Bodies and Cortisol</title>
+	  <!-- Initialize a global WBK function, wikidata for fetch  -->
+	  <script src="https://cdn.rawgit.com/maxlath/wikidata-sdk/dist/dist/wikibase-sdk.min.js"></script>
+	  <!-- Initialize a global wdk object using the WBK object, wikidata -->
+	  <script src="https://cdn.rawgit.com/maxlath/wikidata-sdk/dist/dist/wikidata-sdk.min.js"></script>
+	  <!-- d3 library -->
+	  <script src="https://d3js.org/d3.v5.min.js"></script>
+	  <!-- for d3, obtained from Ander -->
+	  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  </head>
+    <body>
+	  <h1>WHAT IS THE LINK BETWEEN CORTISOL AND KETONE BODIES IN THE HUMAN METABOLISM?</h1>
+	  <h3>Attempting to figure out if and why having more beta-hydroxybutyrate (BHB) effects the quantity of cortisol in our systems.</h3>
+	  <div id="foo"> <!-- initializing div id that we call later -->
+		<script>
+		//initializing variable 
+			var dataCORT = []; //raw query cort data
+			var dataKB = []; //raw query cort data
+			var nodes = []; // creating array for node data (first will be protein/metabolite, second is the group)
+			var links = []; // data needed for links array, metabolite to protein and value
+			var dataOG = []; //dataKB + dataCORT, combining two raw data sets
+			var distinctData = []; //array of objects with unique elements
+			var dataStrings = []; //array of strings made from data array objects
+			var distinctDataStrings = []; //array of strings with unique elements
+			var nodesString = []; //array of strings made from node objects
+			var data = new Object();  // what d3 wants 
+			var proteinLinksString = [];
+			var proteinLinks = [];
+
+
+
+		//pulling queries
+			url = "http://sparql.wikipathways.org/" 
+			queryCORT = `
+			PREFIX wdt: <http://www.wikidata.org/prop/direct/>           
+			PREFIX wd:  <http://www.wikidata.org/entity/>         
+			SELECT  ?inchikey ?hgnc                                             
+			WHERE {                                                              
+			  SERVICE <https://query.wikidata.org/sparql>   
+			  {
+				VALUES ?wikidata { wd:Q190875 }                                  
+				?wikidata wdt:P235 ?inchikey .                                                                                             
+			 }
+			  ?metabolite a wp:Metabolite ;                                                          
+						  rdfs:label ?metaboliteLabel ;
+						  wp:bdbWikidata ?wikidata ;
+						  dcterms:isPartOf ?pathway .                       
+			  ?pathway a wp:Pathway ;                                      
+					   foaf:page ?homepage .                               
+			  ?protein a wp:Protein ;
+						  rdfs:label ?proteinLabel ;
+						  wp:bdbHgncSymbol ?hgnc;                          
+						  dcterms:isPartOf ?pathway .
+			 ?pathway wp:organismName "Homo sapiens"^^xsd:string .
+			}
+			`
+			
+			queryKB = `
+			PREFIX wdt: <http://www.wikidata.org/prop/direct/>                    
+			PREFIX wd:  <http://www.wikidata.org/entity/>                        
+
+			SELECT ?inchikey ?hgnc                                                 
+			WHERE {                                                              
+			  SERVICE <https://query.wikidata.org/sparql> 
+			  {                      
+
+				?wikidata wdt:P31 wd:Q746183 ;                                   
+						  wdt:P235 ?inchikey .                                                          
+			  }
+
+			  ?metabolite a wp:Metabolite ;                               
+						  rdfs:label ?metaboliteLabel ;
+						  wp:bdbWikidata ?wikidata ;                        
+						  dcterms:isPartOf ?pathway .                       
+			  ?pathway a wp:Pathway ;                                          
+					   foaf:page ?homepage .                            
+			  ?protein a wp:Protein ;
+						  rdfs:label ?proteinLabel ;
+						  wp:bdbHgncSymbol ?hgnc ;                          
+						  dcterms:isPartOf ?pathway .
+			  ?pathway wp:organismName "Homo sapiens"^^xsd:string .
+
+			} 
+			  `
+			  
+			//end of virtuoso (SPARQL) queries being used
+			  
+		/* notes: 
+			wdt = predicate
+			wd = entity, wp = entity in Wikipathways
+			federated => go look inside of wikidata, tell where to do the federation (SERVICE)
+			? = variable, ?wikidata = cortisol
+			predicate:p235 is "inchekey" = give me the inchikey of cortisol
+			
+			rdfs:label == "predicate" ?proteinLabel is the label of this protein in WP
+			wp:bdbWikidata ?wikidata ; == this identifier in wikidata, set property that is the identifier
+			dcterms:isPartOf  
+		*/
+		
+			var queryUrlc = encodeURI( url+"?query="+queryCORT );
+			fetch( queryUrlc, {headers: {"Accept": 'application/json'}} )
+			  .then( response => response.json() )
+			  .then( wdk.simplify.sparqlResults )
+			  .then( function (response) {  // assign other data...
+			  //put the second fetch with fx inside
+			  dataCORT = response;
+
+			var queryUrlkb = encodeURI( url+"?query="+queryKB );
+			fetch( queryUrlkb, {headers: {"Accept": 'application/json'}} )
+			  .then( response => response.json() )
+			  .then( wdk.simplify.sparqlResults )
+			  .then( function (response) {
+				  dataKB = response;
+
+				  dataOG = dataCORT.concat(dataKB);
+				  getAll(dataOG);
+				  visualize(data);}
+				)	
+				}
+			  ) // inbedded inorder to run both and not have syncrinousity
+
+
+			//this function encapsulated all the arrangement of the data in order for D3 to use it propertly	 
+			function getAll(dataOG){
+
+				function label(identifier){ // function made so we can change the query output to a readable (for humans and d3) output 
+					var idLabel;
+
+					if (identifier === "WDJHALXBUFZDSR-UHFFFAOYSA-N") {
+						idLabel = "ACA";				
+					}else if (identifier === "WHBMMWSBFZVSSR-GSVOUGTGSA-N") {
+						idLabel = "BHB";	
+					} else if (identifier === "JYGXADMDTFJGBT-VWUMJDOOSA-N" ){
+						idLabel = "Cortisol";
+					} else if (identifier === undefined || identifier === null) {
+						idLabel = "Undefined";
+					} else {
+						idLabel = identifier.slice(35);
+					}
+
+					return idLabel;
+				} 
+
+				dataOG.forEach(object => dataStrings.push(object.inchikey + object.hgnc)); //make an array of strings of the objects in data
+
+				const unique = (value, index, self) => { //how does this work?
+					return self.indexOf(value) === index
+				}
+
+				distinctDataStrings = dataStrings.filter(unique); //find unique values in dataStrings
+
+				//creating object from each element in the arrray of strings		
+				for(var i = 0; i < distinctDataStrings.length; i++) {
+					var dataPoint = new Object();
+					dataPoint.inchikey = distinctDataStrings[i].slice(0, 27);
+					dataPoint.hgnc = distinctDataStrings[i].slice(27);
+					distinctData.push(dataPoint);
+				}
+
+				//make arrays of Strings for both nodes and links in order to avoid adding duplicates to the real nodes and links arrays
+				//add elements to nodes and links arrays
+				for(var i = 0; i < distinctData.length; i++) {
+
+					var link = new Object();
+					link.source = label(distinctData[i].inchikey);
+					link.target = label(distinctData[i].hgnc);
+					link.value = 1; //setting the thickness of the line to one, because we can not weight it propertly representative
+					links.push(link);
+
+				}
+				
+				//Create an array of object listing proteins and metabolite they are linked to
+				for (var i = 0;i < links.length;i++){
+					if (!proteinLinksString.includes(links[i].target)){
+						proteinLinksString.push(links[i].target)
+					}
+				}
+				for (var i = 0;i < proteinLinksString.length;i++){
+					proteinLinks[i] = new Object;
+					proteinLinks[i].prot = proteinLinksString[i];
+					proteinLinks[i].metabolite = [];				
+				}
+				for(var j = 0;j < proteinLinks.length;j++){
+					for(var i = 0;i < links.length;i++){
+						if(links[i].target === proteinLinksString[j]){
+							proteinLinks[j].metabolite.push(links[i].source);
+						}
+					}	
+				}
+				
+				for (var i = 0; i < distinctData.length; i++) {
+						if(!nodesString.includes(label(distinctData[i].inchikey))) {
+						nodesString.push(label(distinctData[i].inchikey));
+						var node = new Object();
+						node.id = label(distinctData[i].inchikey);
+						node.group = groupify(node);
+						nodes.push(node);
+					}
+
+					if(!nodesString.includes(label(distinctData[i].hgnc))) {
+						nodesString.push(label(distinctData[i].hgnc));
+						var node = new Object();
+						node.id = label(distinctData[i].hgnc);
+						node.group = groupify(node)
+						nodes.push(node);
+					}
+
+				}
+
+
+
+				//add property group number for BHB and Cortisol. Can it be abstracted?		
+				function groupify(node){
+					if (node.id === "Cortisol") {
+						return 1;
+					} else if (node.id === "ACA") {
+						return 2;   // this works
+					} else if (node.id === "BHB") {
+						return 3;   // this works
+					} else if (node.id === "MAOA") {
+						return 7;
+					} else {
+							for (var k = 0; k < proteinLinks.length; k++) {
+							if(node.id === proteinLinksString[k]){
+								if(proteinLinks[k].metabolite[0] === "Cortisol"){
+									if (proteinLinks[k].metabolite.length === 1){
+										return 4;
+									}else {return 6;}
+								}else {return 5;}
+							}
+						}
+					}
+					
+				}
+
+			data.nodes = nodes;
+			data.links = links;
+			} //getall fx ends
+
+			//begigning of D3
+
+			height = 1500
+			width = 2000
+
+			colors = [ "red", "green", "blue", "purple", "pink", "yellow", "orange"] // the colors which will go with the different groups 
+
+			function visualize(vizdata) { 	//create function - d3 starts - use d3 functions to split data
+
+				const svg = d3.create("svg").attr("viewBox", [0, 0, width, height]);// create display, some place to put the diagram
+
+				//  first create the different elements of the diagram (each element is an object d) from data.links and data.nodes
+				const vizlinks = vizdata.links.map(d => Object.create(d));
+				const viznodes = vizdata.nodes.map(d => Object.create(d));
+
+				const simulation = d3.forceSimulation(nodes)     /// expansion of the diagram
+				   .force("link", d3.forceLink(links).id(d => d.id)) //for creating a fixed distance between connected elements
+				   .force("charge", d3.forceManyBody().strength(-20)) //for making elements attract or repel one another default -30
+				   .force("center", d3.forceCenter(width / 2 + 100, height / 2)); //for setting the center of gravity of the system
+
+				simulation.on("tick", tickActions);
+
+
+				  const link = svg.append("g") // shaping the links 
+					  .attr("stroke", "#999")
+					  .attr("stroke-opacity", 0.6)
+					.selectAll("line")
+					.data(vizlinks)
+					.join("line")
+					  .attr("stroke-width", d => Math.sqrt(d.value));
+
+				  const node = svg.append("g") // shaping nodes
+					  .attr("stroke", "#fff")
+					  .attr("stroke-width", 1.5)
+						.selectAll("circle")
+						.data(viznodes)
+						.join("circle")
+					  .attr("r", 5)
+					  .attr("fill", function(d) { return colors[d.group-1]} ); // assigning colors; -1 bc color array indexing starts at 0 while groups start at 1, fun(d) returs color on input d
+
+				  var drag_handler = d3.drag()
+						.on("start", drag_start)
+						.on("drag", drag_drag)
+						.on("end", drag_end);	
+
+					//same as using .call on the node variable as in the reference 
+					drag_handler(node);
+
+					//drag handler
+					//d is the node 
+					function drag_start(d) {
+					 if (!d3.event.active) simulation.alphaTarget(0.3	).restart();
+					   d.fx = d.x;
+					   d.fy = d.y;
+					}
+
+					function drag_drag(d) {
+					  d.fx = d3.event.x;
+					  d.fy = d3.event.y;
+					}
+
+
+					function drag_end(d) {
+					  if (!d3.event.active) simulation.alphaTarget(0);
+					  d.fx = null;
+					  d.fy = null;
+					}
+
+
+				  node.append("title") // assign each node's id as a node title in the diagram
+					  .text(d => d.id);
+
+				  function tickActions() {
+					//update circle positions each tick of the simulation 
+					node
+						.attr("cx", function(d) { return d.x; })
+						.attr("cy", function(d) { return d.y; });
+
+					//update link positions 
+					//simply tells one end of the line to follow one node around
+					//and the other end of the line to follow the other node around
+					link
+						.attr("x1", function(d) { return d.source.x; })
+						.attr("y1", function(d) { return d.source.y; })
+						.attr("x2", function(d) { return d.target.x; })
+						.attr("y2", function(d) { return d.target.y; });
+				  } 
+
+			  document.getElementById("foo").appendChild(svg.node());
+			 } 
+
+
+		</script>
+	  </div>
+	  
+	  <div class="row">
+		  <div class="legend">
+			  <h2>COLOR CODES</h2>
+				<b><ul type="none">
+				  <li style="color:red">Cortisol</li>
+				  <li style="color:purple">Enzyme linked to cortisol</li>
+				  <li style="color:blue">BHB</li>
+				  <li style="color:green">ACA</li>
+				  <li style="color:pink">Enzyme linked to ACA or BHB</li>
+				  <li style="color:orange">MAOA</li>
+				</ul></b>
+		  </div>
+		  
+		  <div class="infobox">
+			  <h2>Description of the project</h2>
+			  <p>In this project, we tried to find a conenction between ketone bodies and cortisol in our bodies. According to studies (cite), ketogenic diet might have an effect
+			  on cortisol. We queried data from WikiPathways and WikiData. This data contains proteins associated with acetoacetate, BHB and cortisol. With this method, we succeded
+			  to find one connecting enzyme, MAOA. MAOA .... </p>
+		  </div>
+
+	  </div>
+	  		  
+	  <footer>
+		<p>Raquel Grosman Cordero + Yann Laroche + Maija Utriainen</p>
+		<a href="https://www.wikipathways.org/index.php/WikiPathways">
+		<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Wplogo_with_text_500.png/150px-Wplogo_with_text_500.png" alt="WikiPathways logo" width="110" height="100" hspace="20"/>
+		</a>
+		<a href="https://www.wikidata.org/wiki/Wikidata:Main_Page">
+	    <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/Wikidata_barcode.svg" alt="WikiData logo" width="120" height="100" hspace="20"/>
+		</a>
+	    <a href="https://github.com/RaquelGrosman/PRA3006_2019">
+		<img src="https://www.icescrum.com/wp-content/uploads/2018/10/github.png" alt="GitHub logo" width="130" height="100" hspace="20"/>
+		</a>
+      </footer>
+	  
+	</body>
+</html>
+
+
+
+
+<!-- if we cannot do the drag then customize the label tags that appear when hovering mouse over node -->
