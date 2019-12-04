@@ -9,7 +9,7 @@
 		text-align: center;
 	  }
 	  
-	  .legend {
+	  .legend { <!-- color codes-->
 		padding: 20px;
 		flex: 20%; <!-- width 30% -->
 	  }
@@ -43,7 +43,8 @@
 	  <!-- for d3, obtained from Ander -->
 	  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
   </head>
-    <body>
+ 
+  <body>
 	  <h1>WHAT IS THE LINK BETWEEN CORTISOL AND KETONE BODIES IN THE HUMAN METABOLISM?</h1>
 	  <h3>Attempting to figure out if and why having more beta-hydroxybutyrate (BHB) effects the quantity of cortisol in our systems.</h3>
 	  <div id="foo"> <!-- initializing div id that we call later -->
@@ -277,7 +278,7 @@
 			height = 1500
 			width = 2000
 
-			colors = [ "red", "green", "blue", "purple", "pink", "yellow", "orange"] // the colors which will go with the different groups 
+			colors = [ "red", "green", "blue", "purple", "orange", "yellow", "turquoise"] // the colors which will go with the different groups 
 
 			function visualize(vizdata) { 	//create function - d3 starts - use d3 functions to split data
 
@@ -369,22 +370,27 @@
 	  
 	  <div class="row">
 		  <div class="legend">
-			  <h2>COLOR CODES</h2>
+			  <h2>   COLOR CODES</h2>
 				<b><ul type="none">
-				  <li style="color:red">Cortisol</li>
-				  <li style="color:purple">Enzyme linked to cortisol</li>
+				  <li style="color:turquoise">MAOA</li>
 				  <li style="color:blue">BHB</li>
 				  <li style="color:green">ACA</li>
-				  <li style="color:pink">Enzyme linked to ACA or BHB</li>
-				  <li style="color:orange">MAOA</li>
+				  <li style="color:red">Cortisol</li>
+				  <li style="color:orange">Enzyme linked to ACA or BHB</li>
+				  <li style="color:purple">Enzyme linked to cortisol</li>
 				</ul></b>
 		  </div>
 		  
 		  <div class="infobox">
 			  <h2>Description of the project</h2>
-			  <p>In this project, we tried to find a conenction between ketone bodies and cortisol in our bodies. According to studies (cite), ketogenic diet might have an effect
-			  on cortisol. We queried data from WikiPathways and WikiData. This data contains proteins associated with acetoacetate, BHB and cortisol. With this method, we succeded
-			  to find one connecting enzyme, MAOA. MAOA .... </p>
+			  <p>In this project, we attempted to find a connection between ketone bodies and cortisol in humans. 
+			  According to some studies, the following the ketogenic diet has an effect on cortisol quantity in our systems. 
+			  In order to prove whether this dietary style does or does not affect and how, we attempted to find the link of 
+			  these two metabolites. We queried data from WikiPathways and WikiData in order to see the connection between 
+			  these two metabolites. This data contains proteins associated with acetoacetate, BHB and cortisol. 
+			  With this method, we succeeded to visualize the protein, or connecting enzyme, Monoamine oxidase A (MAOA). 
+			  Further research is needed to better comprehend link. Potential analysis on gene product would aid in a more 
+			  holistic understanding of link. </p>
 		  </div>
 
 	  </div>
