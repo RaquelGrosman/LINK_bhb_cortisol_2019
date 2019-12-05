@@ -11,20 +11,13 @@
 	  
 	  .legend { <!-- color codes-->
 		padding: 20px;
-		flex: 20%; <!-- width 30% -->
 	  }
 	  
 	  .infobox { <!-- description of the project -->
 		padding: 20px;
-		flex: 40%;
 		background-color: #f1f1f1;
 	  }
-		
-	  .row {  <!-- creates an element containing infobox and legend, which take a percentage of the space -->
-	    display: flex;
-	    flex-wrap: wrap;
-	  }
-	  
+
 	  footer {
 		padding-top: 100px;
 		text-align: center;
@@ -120,7 +113,16 @@
 			} 
 			  `			  
 			//end of virtuoso (SPARQL) queries being used
+			
+			/* notes on the queries: 
+			url => where the query is called
+			SERVICE => where the federation is called
+			queryCORT /-KB => calling inchikey (cortisol/kb) + hgnc (enzyme in the same wikipathway) for cortisol / ketone body		
+			SPARQL query code can be found on GitHub project page under: bhbPROTEINS_foruse and CortisolPROTEINS_foruse
+		    */
 		
+			//fetching the queries as json
+			//acts as main code fron within, getALL(which arrenges data as neede) and visualize(which is the inplementaion of D3) are called 
 			var queryUrlc = encodeURI( url+"?query="+queryCORT ); // encode query on the url provided
 			fetch( queryUrlc, {headers: {"Accept": 'application/json'}} )
 			  .then( response => response.json() )
@@ -141,7 +143,7 @@
 				  visualize(data);}  // d3 visualisation with data object as input
 				)	
 				}
-			  ) 
+			  ) // inbedded inorder to run both and not have syncrinousity
 
 
 			//this function encapsulates all the data processing required for visualization 
@@ -159,8 +161,8 @@
 					} else if (identifier === undefined || identifier === null) { // prevent errors
 						idLabel = "Undefined";
 					} else {
-						idLabel = identifier.slice(35); // to remove all characters of the http links provided by the query and leave out the HGNC id
-					}
+						idLabel = identifier.slice(35); // to remove first 34 characters of the http links provided by the query and only leave the HGNC id
+					}		
 
 					return idLabel;
 				} 
@@ -194,14 +196,14 @@
 				}
 				
 				//Create an array of object listing proteins and metabolite they are linked to (an array of strings had to be used first to use the includes function and prevent duplicates)
-				// For each pair in links...
+				//done for each pair in links...
 				for (var i = 0;i < links.length;i++){
-				// ... record the protein if it has not been recorded yet
+				// ...and record the protein if it has not been recorded yet
 					if (!proteinLinksString.includes(links[i].target)){
 						proteinLinksString.push(links[i].target)
 					}
 				} 
-				// For each  protein in ProteinLinksString...
+				// For each protein in ProteinLinksString...
 				for (var i = 0;i < proteinLinksString.length;i++){
 					proteinLinks[i] = new Object;
 					proteinLinks[i].prot = proteinLinksString[i]; // ... record the protein...
@@ -227,7 +229,7 @@
 						var node = new Object();
 						node.id = label(distinctData[i].inchikey); // assign the name to the id using label function to turn InChI key into the name
 						node.group = groupify(node); // assign group based on nature of metabolite
-						nodes.push(node);
+						nodes.push(node);  //add via push into new nodes 
 					}
 				// same process as above but for the proteins of the same links element
 					if(!nodesString.includes(label(distinctData[i].hgnc))) {
@@ -235,7 +237,7 @@
 						var node = new Object();
 						node.id = label(distinctData[i].hgnc);
 						node.group = groupify(node) // assign group based on metabolites recorded in metabolite array of proteinLinks element of that protein
-						nodes.push(node);
+						nodes.push(node); //add via push into new nodes 
 					}
 
 				}
@@ -311,7 +313,7 @@
 				  simulation.on("tick", tickActions);
 
 				  node.append("title") // assign each node's id as a node title in the diagram
-					  .text(d => d.id);
+					  .text(d => d.id);  // what makes the label given visible while mouse is hovering over node 
 
 				  function tickActions() {
 					// update node positions each tick of the simulation 
@@ -375,6 +377,14 @@
 	    <a href="https://github.com/RaquelGrosman/PRA3006_2019">
 		<img src="https://www.icescrum.com/wp-content/uploads/2018/10/github.png" alt="GitHub logo" width="130" height="100" hspace="20"/>
 		</a>
+		<a href="https://www.wikidata.org/wiki/Wikidata:Main_Page">
+	    <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/Wikidata_barcode.svg" alt="WikiData logo" width="120" height="100" hspace="20"/>
+		</a>
+	    <a href="https://github.com/RaquelGrosman/PRA3006_2019">
+		<img src="https://www.icescrum.com/wp-content/uploads/2018/10/github.png" alt="GitHub logo" width="130" height="100" hspace="20"/>
+		</a>
+		
+		
       </footer>
 	  
 	</body>
