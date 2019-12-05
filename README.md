@@ -7,7 +7,7 @@ The biological question in this case was "What is the relationship between Beta-
 
 The names of all group members are in the "AUTHORS" file.
 
-The files containing the final version of our code is the "FINAL" file;
+The file containing the final version of our code is the "FINAL" file;
 This file has the complete code for the web page which was the concluding result of this project;
 The code can directly be copy-pasted into a text file, saved as an html file, and openened in a browser;
 As for the type of browser to use: we only tested the display of the web page on Brave, Chrome, and Microsoft Edge;
