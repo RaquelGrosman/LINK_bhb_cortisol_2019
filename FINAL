@@ -40,8 +40,8 @@
   <body>
 	  <h1>WHAT IS THE LINK BETWEEN CORTISOL AND KETONE BODIES IN THE HUMAN METABOLISM?</h1>
 	  <h3>Attempting to figure out if and why having more beta-hydroxybutyrate (BHB) effects the quantity of cortisol in our systems.</h3>
-	  
-	  <div id="foo"> <!-- initializing div id that we call later -->
+
+	  <div id= "foo"> <!-- initializing div id that we call later -->
 		<script>
 		//initializing variables 
 			var dataCORT = []; //raw Cortisol query data
@@ -374,14 +374,14 @@
 		<a href="https://www.wikidata.org/wiki/Wikidata:Main_Page">
 	    <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/Wikidata_barcode.svg" alt="WikiData logo" width="120" height="100" hspace="20"/>
 		</a>
-	    <a href="https://github.com/RaquelGrosman/PRA3006_2019">
+	    <a href="https://github.com/RaquelGrosman/LINK_bhb_cortisol_2019">
 		<img src="https://www.icescrum.com/wp-content/uploads/2018/10/github.png" alt="GitHub logo" width="130" height="100" hspace="20"/>
 		</a>
-		<a href="https://www.wikidata.org/wiki/Wikidata:Main_Page">
-	    <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/Wikidata_barcode.svg" alt="WikiData logo" width="120" height="100" hspace="20"/>
+		<a href="https://www.maastrichtuniversity.nl/education/bachelor/bachelor-maastricht-science-programme">
+	    <img src="https://yt3.ggpht.com/a/AGF-l7_vcj07ucIJFxSUn4oIAq-b4TPhaRRaTRqkMw=s900-c-k-c0xffffffff-no-rj-mo" alt="MSP logo" width="120" height="100" hspace="20"/>
 		</a>
-	    <a href="https://github.com/RaquelGrosman/PRA3006_2019">
-		<img src="https://www.icescrum.com/wp-content/uploads/2018/10/github.png" alt="GitHub logo" width="130" height="100" hspace="20"/>
+	    <a href="https://www.bigcat.unimaas.nl/">
+		<img src="https://pbs.twimg.com/profile_images/1091401475/logo_05_72dpi.gif" alt="GitHub logo" width="130" height="100" hspace="20"/>
 		</a>
 		
 		
