@@ -10,7 +10,7 @@ _Project Completed: December 2019_
 This repository has all the files used by one group of students, during the PRA3006 practical at the Maastricht Science Program;
 The goal of this project was to combine SPARQL Queries, Javascript, and HTML to visualise the answer to a biological question on a web page.
 
-_The biological question in this case was "What is the relationship between Beta-Hydroxybutyrate (BHB) and Cortisol inside the human metabolism ?"_
+The biological question in this case was _"What is the relationship between Beta-Hydroxybutyrate (BHB) and Cortisol inside the human metabolism ?"_
 
 The names of all group members are in the **"AUTHORS"** file.
 
@@ -32,7 +32,7 @@ Please note that all of the other code files were the build up of final code, th
 _Open source, MIT License can be found in **"LICENSE"** file._
 
 ----------------------------------------------------------------------------------
-Acknowledgement (name, GitHub username)
+Acknowledgements (name, GitHub username)
 * Egon Willighagen, egonw
 * Ammar Ammar, a-ammar
 * Swapneel Datta, swd543 
