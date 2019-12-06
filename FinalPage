@@ -111,7 +111,7 @@
 			url => where the query is called
 			SERVICE => where the federation is called
 			queryCORT /-KB => calling inchikey (cortisol/kb) + hgnc (enzyme in the same wikipathway) for cortisol / ketone body		
-			SPARQL query code can be found on GitHub project page under: bhbPROTEINS_foruse and CortisolPROTEINS_foruse
+			SPARQL query code can be found on GitHub project page under: kbPROTEINS_foruse and CortisolPROTEINS_foruse
 		    */
 		
 			//fetching the queries as json
