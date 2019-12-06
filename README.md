@@ -1,11 +1,11 @@
 LINK_bhb_cortisol_2019
 ========================
 
-PRA3006: Programming in the Life Sciences: Completed project
+PRA3006: Programming in the Life Sciences
 ------------------------------------------------------------
 
-December 2019
-----------------
+Project Completed: December 2019
+---------------------------------
 
 This repository has all the files used by one group of students, during the PRA3006 practical at the Maastricht Science Program;
 The goal of this project was to combine SPARQL Queries, Javascript, and HTML to visualise the answer to a biological question on a web page.
