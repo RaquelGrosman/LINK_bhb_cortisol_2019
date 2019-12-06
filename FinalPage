@@ -301,7 +301,9 @@
 				//  first create the different elements of the diagram (each element is an object d) from data.links and data.nodes
 				const vizlinks = vizdata.links.map(d => d); // create an array of objects (vizlinks) for each element in links
 				const viznodes = vizdata.nodes.map(d => d); // create an array of objects (viznodes) for each element in nodes
-				//removed Object.create(d)which was in the D3 code originally 
+				//removed Object.create(d)which was in the D3 code originally  - this was causing to reset object everytime, 
+				//Swapneel Datta noticed this incongruency; drag FINALLY worked (aknowlegement of QC to S. Datta: GitHub name : swd543) 
+				
 				
 				const simulation = d3.forceSimulation(nodes)     /// expansion of the diagram (visualisation starts)
 				   .force("link", d3.forceLink(links).id(d => d.id)) // creates a new link force between the source and target using the nodes id
