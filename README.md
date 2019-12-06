@@ -29,7 +29,7 @@ Other files of importance which include SPARQL(Virtuoso) queries codes are;
 
 Please note that all of the other code files were the build up of final code, therefore are not very relevant. 
 
-_Open course, MIT License can be found in **"LICENSE"** file._
+_Open source, MIT License can be found in **"LICENSE"** file._
 
 ----------------------------------------------------------------------------------
 Acknowledgement (name, GitHub username)
