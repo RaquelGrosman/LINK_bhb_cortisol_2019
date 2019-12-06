@@ -29,6 +29,8 @@ Other files of importance which include SPARQL(Virtuoso) queries codes are;
 
 Please note that all of the other code files were the build up of final code, therefore are not very relevant. 
 
+_Open course, MIT Licence._
+
 ----------------------------------------------------------------------------------
 Acknowledgement (name, GitHub username)
 * Egon Willighagen, egonw
